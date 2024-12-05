@@ -1,0 +1,52 @@
+INSTA_SERVER
+│
+├── config
+│   ├── server.config.js
+│   ├── socket.config.js
+│
+├── controller
+│   ├── emailController.js
+│   ├── followController.js
+│   ├── postController.js
+│   ├── userController.js
+│
+├── database
+│   ├── config.js
+│   ├── database.js
+│
+├── middleware
+│   ├── authentication.js
+│   ├── rateLimit.js
+│
+├── model
+│   ├── commentModel.js
+│   ├── followModel.js
+│   ├── index.js
+│   ├── likeModel.js
+│   ├── notificationModel.js
+│   ├── postModel.js
+│   ├── templateModel.js
+│   ├── tempUserModel.js
+│   ├── userModel.js
+│
+├── node_modules
+│
+├── routes
+│   ├── postRoutes.js
+│   ├── userRoutes.js
+│   ├── verificationRoutes.js
+│
+├── uploads
+│
+├── util
+│   ├── multer.js
+│   ├── nodeMailer.js
+│   ├── response.js
+│   ├── validator.js
+│
+├── .env
+├── sample.env
+├── index.js
+├── package-lock.json
+├── package.json
+├── .structure
