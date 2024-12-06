@@ -41,77 +41,67 @@ exports.getAllPosts = async (req, res) => {
     }
 
 
-    try {
-        const { count, rows } = await Posts.findAndCountAll({
-            where: whereCondition,
-            limit: parseInt(limit),
-            offset: parseInt(offset),
-            order: [
-                [sortColumn, sortDirection.toLowerCase()]
-            ],
-            include: [{
-                model: Users,
-                attributes: ['name', 'email', 'user_id'],
-            }],
-            attributes: {
-                include: [
-                    [literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.postId = Posts.id)`), 'Likes'],
-                    [literal('(SELECT COUNT(*) FROM Comments WHERE Comments.post_id = Posts.id)'), 'Comments'],
-                ]
-            },
-        });
+    const { count, rows } = await Posts.findAndCountAll({
+        where: whereCondition,
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        order: [
+            [sortColumn, sortDirection.toLowerCase()]
+        ],
+        include: [{
+            model: Users,
+            attributes: ['name', 'email', 'user_id'],
+        }],
+        attributes: {
+            include: [
+                [literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.postId = Posts.id)`), 'Likes'],
+                [literal('(SELECT COUNT(*) FROM Comments WHERE Comments.post_id = Posts.id)'), 'Comments'],
+            ]
+        },
+    });
 
-        const totalPages = Math.ceil(count / limit);
+    const totalPages = Math.ceil(count / limit);
 
-        if (rows.length === 0) {
-            return res.json({ users: rows, count, totalPages, currentPage: parseInt(page), });
-        }
-
-        res.json({
-            users: rows,
-            count,
-            totalPages,
-            currentPage: parseInt(page),
-        });
-
-    } catch (error) {
-        console.log("Error \n" + error);
-        return response.serverError(res, error, "Error Loading user !")
+    if (rows.length === 0) {
+        return res.json({ users: rows, count, totalPages, currentPage: parseInt(page), });
     }
+
+    res.json({
+        users: rows,
+        count,
+        totalPages,
+        currentPage: parseInt(page),
+    });
+
 }
- 
+
 // delete a post
 exports.deletePost = async (req, res) => {
     console.log("inside deletePost ::");
     const { id } = req.params;
 
 
-    const rules = { id: "required|numeric" };
+    const rules = { id: "required|numeric|exist:posts,id" };
     let { status, message } = await validate({ id }, rules);
     if (!status) return response.failed(res, message);
 
-    try {
-        // get the post &  image path
-        const post = await Posts.findOne({ where: { id }, attributes: ['image_path'] });
-        if (!post) return response.failed(res, `No post found for post ${id}.`);
+    // get the post &  image path
+    const post = await Posts.findOne({ where: { id }, attributes: ['image_path'] });
+    if (!post) return response.failed(res, `No post found for post ${id}.`);
 
-        // remove post
-        const deletedRows = await Posts.destroy({ where: { id } });
-        if (deletedRows === 0) {
-            return response.failed(res, "Failed to delete the post.");
-        }
-
-        // also remove post image
-        if (post.image_path) {
-            const imagePath = path.join(__dirname, '../../', post.image_path);
-            fs.unlink(imagePath, (err) => {
-                if (err) console.error("error deleting post image:", err);
-                else console.log("Post image deleted successfully");
-            });
-        }
-        return response.success(res, `Successfully deleted the post : ${id}.`);
-    } catch (error) {
-        console.error("Error deleting the post:", error);
-        return response.serverError(res);
+    // remove post
+    const deletedRows = await Posts.destroy({ where: { id } });
+    if (deletedRows === 0) {
+        return response.failed(res, "Failed to delete the post.");
     }
+
+    // also remove post image
+    if (post.image_path) {
+        const imagePath = path.join(__dirname, '../../', post.image_path);
+        fs.unlink(imagePath, (err) => {
+            if (err) console.error("error deleting post image:", err);
+            else console.log("Post image deleted successfully");
+        });
+    }
+    return response.success(res, `Successfully deleted the post : ${id}.`);
 };

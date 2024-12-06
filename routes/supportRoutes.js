@@ -1,15 +1,14 @@
 const express = require("express");
 const supportRoutes = express.Router();
-const issuesController = require("../controller/issuesController.js")
-const { authentication } = require('../middleware/authentication.js');
-const { storage_support, imageFileFilter } = require("../util/multer.js")
+const { getIssue, getIssues, addIssue, addIssueChat, resolveIssue, getIssueConversation } = require("../controller/issuesController.js")
 const multer = require('multer');
+const asyncHandler = require("../middleware/asyncHandler.js");
 
 
-supportRoutes.get("/issues", authentication, issuesController.getIssues);  // get issues list
-supportRoutes.get("/issue/:id", authentication, issuesController.getIssue); // get a single issue
-supportRoutes.post("/resolve/:issue_id", authentication, issuesController.resolveIssue);// resolve a issue by id
-supportRoutes.get("/conversation/:id", issuesController.getIssueConversation);// get issue conversation
+supportRoutes.get("/issues", asyncHandler(getIssues));
+supportRoutes.get("/issue/:id", asyncHandler(getIssue));
+supportRoutes.post("/resolve/:issue_id", asyncHandler(resolveIssue));
+supportRoutes.get("/conversation/:id", asyncHandler(getIssueConversation));
 
 
 const storage = multer.memoryStorage();
@@ -25,7 +24,7 @@ const upload = multer({
         }
     },
 });
-supportRoutes.post("/add-issue", authentication, upload.single("screenshot"), issuesController.addIssue);// add new issue
-supportRoutes.post("/add-message", authentication, upload.single("conversation_image"), issuesController.addIssueChat);// add new message
+supportRoutes.post("/add-issue", upload.single("screenshot"), asyncHandler(addIssue));// add new issue
+supportRoutes.post("/add-message", upload.single("conversation_image"), asyncHandler(addIssueChat));// add new message
 
 module.exports = supportRoutes

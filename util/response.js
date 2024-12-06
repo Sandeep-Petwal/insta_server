@@ -23,6 +23,8 @@ exports.unauthorized = (res, message = 'Unauthorized access') => {
 };
 
 exports.serverError = (res, error = "Internal server error", message = 'Internal server error') => {
+    if (!res) return console.log(error);
+    
     return res.status(500).json({ message, error });
 
 };

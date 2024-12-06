@@ -3,7 +3,7 @@ const rateLimit = require('express-rate-limit');
 // rate limiter middleware
 const limiter = rateLimit({
     windowMs: 1 * 60 * 1000, // time in ms (1 min)
-    max: 40, // Limit each IP
+    max: 30, // Limit each IP
     standardHeaders: true,
     legacyHeaders: false,
 });

@@ -28,7 +28,7 @@ const adminLogger = async (req, res, next) => {
                 console.error('Error logging admin action:', error);
                 console.log("\nError in logging :: Route :: \n" + req.originalUrl);
             }
-        });
+        }); 
 
         next();
     } catch (error) {

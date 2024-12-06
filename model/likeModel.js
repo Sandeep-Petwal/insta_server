@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../database/database"); 
+const sequelize = require("../database/database");
 // const Users = require("./userModel");
 // const Posts = require("./postModel");
 
@@ -31,12 +31,6 @@ const Like = sequelize.define("Like", {
     },
 }, {
     timestamps: false,
-    indexes: [
-        {
-            unique: true,
-            fields: ['user_id', 'postId']
-        }
-    ]
 });
 
 module.exports = Like;

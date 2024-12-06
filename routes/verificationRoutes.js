@@ -1,34 +1,18 @@
 const express = require("express");
-const emailController = require("../controller/emailController")
-const TwoFectorAuth = require("../controller/TwoFectorAuth.js")
 const verificationRoutes = express.Router();
-const auth = require('../middleware/authentication.js');
+const { enable2Fa, disable2Fa, verify2Fa, verifyLogin, createTempUser, verifyUserRegistration, sendForgetPassMail, verifyForgetPassword, changePassword } = require("../controller/TwoFectorAuth.js");
+const { authentication } = require('../middleware/authentication.js');
+const asyncHandler = require("../middleware/asyncHandler.js");
 
+verificationRoutes.post("/enable-2fa", authentication, asyncHandler(enable2Fa));
+verificationRoutes.post("/verify-2fa", authentication, asyncHandler(verify2Fa));
+verificationRoutes.post("/disable2Fa", authentication, asyncHandler(disable2Fa));
+verificationRoutes.post("/login", asyncHandler(verifyLogin));
 
-// request to enable 2fa
-verificationRoutes.post("/enable-2fa", auth.authentication, TwoFectorAuth.enable2Fa)
-verificationRoutes.post("/verify-2fa", auth.authentication, TwoFectorAuth.verify2Fa)
-verificationRoutes.post("/disable2Fa", auth.authentication, TwoFectorAuth.disable2Fa)
+verificationRoutes.post("/createtempuser", asyncHandler(createTempUser));
+verificationRoutes.post("/userregistration", asyncHandler(verifyUserRegistration));
+verificationRoutes.post("/forgotpassword", asyncHandler(sendForgetPassMail));
+verificationRoutes.post("/verifyforgotpass", asyncHandler(verifyForgetPassword));
+verificationRoutes.post("/changepassword/:user_id", authentication, asyncHandler(changePassword));
 
-// verify 2fa login
-verificationRoutes.post("/login", TwoFectorAuth.verifyLogin)
-
-
-
-
-
-
-
-
-verificationRoutes.post("/createtempuser", emailController.createTempUser); // http://localhost:3005/api/verify/createtempuser
-verificationRoutes.post("/userregistration", emailController.verifyUserRegistration); // http://localhost:3005/api/verify/userregistration
-
-verificationRoutes.post("/forgotpassword", emailController.sendForgetPassMail);
-verificationRoutes.post("/verifyforgotpass", emailController.verifyForgetPassword);  // http://localhost:3005/api/verify/verifyforgotpass/3
-
-verificationRoutes.post("/changepassword/:user_id", auth.authentication, emailController.changePassword);  // http://localhost:3005/api/verify/changepassword/3
-// verificationRoutes.post("/verifychangepassword",  emailController.verifyChangePassword)
-
-
-
-module.exports = verificationRoutes
+module.exports = verificationRoutes;

@@ -8,25 +8,31 @@ const cors = require("cors");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 
-
 const app = express();
 const httpServer = createServer(app);
 
 // Middlewares ---------------------------------
 app.use(cors({ origin: "*" }));
-
+const helmet = require('helmet');
+app.use(helmet());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ error: 'Something went wrong!' });
-});
+const errorHandler = require('./middleware/errorHandler');
+app.use(errorHandler);
+
+
+// Logging   ------------------------------------
+const { logMiddleware, errorLog } = require('./middleware/logging');
+app.use(logMiddleware);
+app.use(errorLog);
+
+
+
 
 // Routes --------------------------------------
 const routes = require('./routes');
-routes.forEach(({ path, route }) => app.use(path, route));
+app.use("/api", routes);
 
 // Socket.IO  ------------------------------------
 const { socketConfig } = require("./config/socket.config")

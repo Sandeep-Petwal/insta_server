@@ -4,8 +4,6 @@ const jwt = require('jsonwebtoken');
 const SECRET_KEY = process.env.SECRET_KEY;
 
 module.exports = (io) => {
-    console.log("socketHandler");
-
     // socket middleware to protect WS
     io.use((socket, next) => {
         const token = socket.handshake.auth.token;

@@ -1,22 +1,14 @@
 const express = require("express");
 const postRoutes = express.Router();
-const postController = require("../controller/postController")
-const multer = require("multer")
-// const { storage, imageFileFilter } = require("../util/multer.js")
-const auth = require('../middleware/authentication.js');
-
-
-// adding new post , http://localhost:3005/api/post/add
-// const upload = multer({
-//     storage,
-//     limits: { fileSize: 1 * 1024 * 1024 },
-//     fileFilter: imageFileFilter
-// });
+const { addPost, deletePost, customizedFeed, getPost, getComments, addComment, editComment, setLikes, deleteComment } = require("../controller/postController");
+const { authentication } = require('../middleware/authentication.js');
+const multer = require("multer");
+const asyncHandler = require("../middleware/asyncHandler.js");
 
 const storage = multer.memoryStorage();
 const upload = multer({
     storage,
-    limits: { fileSize: 1 * 1024 * 1024 }, // 1 MB limit
+    limits: { fileSize: 1 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
         if (file.mimetype.startsWith("image/")) {
             cb(null, true);
@@ -27,44 +19,14 @@ const upload = multer({
     },
 });
 
+postRoutes.post("/add", upload.single("post"), authentication, asyncHandler(addPost));
+postRoutes.delete("/delete/:id", authentication, asyncHandler(deletePost));
+postRoutes.get("/feed", authentication, asyncHandler(customizedFeed));
+postRoutes.get("/fullpost/:post_id", authentication, asyncHandler(getPost));
+postRoutes.get("/comments/:post_id", authentication, asyncHandler(getComments));
+postRoutes.post("/comments/:post_id", authentication, asyncHandler(addComment));
+postRoutes.put("/comment/:comment_id", authentication, asyncHandler(editComment));
+postRoutes.post("/like/:post_id", authentication, asyncHandler(setLikes));
+postRoutes.delete("/comment/:comment_id", authentication, asyncHandler(deleteComment));
 
-postRoutes.post("/add", upload.single("post"), auth.authentication, postController.addPost);
-
-
-
-
-
-
-
-
-
-// deleting the post
-postRoutes.delete("/delete/:id", auth.authentication, postController.deletePost)
-
-
-// getting all posts , http://localhost:3005/api/post/feed?user_id=7
-// postRoutes.get("/feed", auth.authentication, postController.getPosts);     // all posts
-postRoutes.get("/feed", auth.authentication, postController.customizedFeed);        // customized feed
-
-
-
-
-postRoutes.get("/fullpost/:post_id", auth.authentication, postController.getPost); // load a full post with (commets + like), http://localhost:3005/api/post/fullpost/2
-
-
-// get and add commment 
-postRoutes.get("/comments/:post_id", auth.authentication, postController.getComments)
-postRoutes.post("/comments/:post_id", auth.authentication, postController.addComment);
-postRoutes.put("/comment/:comment_id", auth.authentication, postController.editComment);// edit comment,   // http://localhost:3005/api/post/comment/7
-
-
-postRoutes.post("/like/:post_id", auth.authentication, postController.setLikes); // add and remove likes // http://localhost:3005/api/post/like/9
-postRoutes.delete("/comment/:comment_id", auth.authentication, postController.deleteComment);// delete comment,   // http://localhost:3005/api/post/comment/7
-
-
-
-
-
-
-
-module.exports = postRoutes
+module.exports = postRoutes;

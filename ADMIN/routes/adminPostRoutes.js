@@ -1,19 +1,14 @@
 const express = require("express");
-const adminUserController = require("../controller/adminUserController");
-const adminPostController = require("../controller/adminPostController");
-const adminAuth = require("../middleware/adminAuth")
-const adminPostRoutes =  express.Router();
+const { getAllPosts, deletePost } = require("../controller/adminPostController");
+const { authentication } = require("../middleware/adminAuth");
+const asyncHandler = require("../../middleware/asyncHandler");
+const adminPostRoutes = express.Router();
 
+adminPostRoutes.get("/", asyncHandler((req, res) => {
+    res.json({ status: "Working", route: "admin/post" });
+}));
 
+adminPostRoutes.get('/get-posts', authentication, asyncHandler(getAllPosts));
+adminPostRoutes.delete("/delete/:id", authentication, asyncHandler(deletePost));
 
-
-adminPostRoutes.get("/", (req, res) => {
-    res.json({status : "Working", route : "admin/post"})
-})
-
-
-adminPostRoutes.get('/get-posts', adminAuth.authentication, adminPostController.getAllPosts);
-adminPostRoutes.delete("/delete/:id", adminAuth.authentication, adminPostController.deletePost)
-
-
-module.exports = adminPostRoutes
+module.exports = adminPostRoutes;
