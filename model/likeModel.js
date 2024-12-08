@@ -23,7 +23,7 @@ const Like = sequelize.define("Like", {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'posts',
+            model: 'Posts',
             key: 'id',
         },
         onDelete: 'CASCADE',

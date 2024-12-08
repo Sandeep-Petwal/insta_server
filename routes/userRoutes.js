@@ -2,30 +2,30 @@ const express = require("express");
 const userRoutes = express.Router();
 const cloudinary = require('../config/cloudinaryConfig');
 const multer = require("multer");
-const { 
-    logIn, 
-    logOut, 
-    getUser, 
-    getUserPosts, 
-    searchUsers, 
-    editProfile, 
-    softDelete, 
-    getSessions, 
-    deleteSession, 
-    deleteAllSessions 
+const {
+    logIn,
+    logOut,
+    getUser,
+    getUserPosts,
+    searchUsers,
+    editProfile,
+    softDelete,
+    getSessions,
+    deleteSession,
+    deleteAllSessions
 } = require("../controller/userController");
-const { 
-    follow, 
-    acceptRequest, 
-    deleteRequest, 
-    unfollow, 
-    getFollowrequests, 
-    getFollowers, 
-    getFollowing 
+const {
+    follow,
+    acceptRequest,
+    deleteRequest,
+    unfollow,
+    getFollowrequests,
+    getFollowers,
+    getFollowing
 } = require("../controller/followController");
-const { 
-    getNotificaton, 
-    getUnreadCount 
+const {
+    getNotificaton,
+    getUnreadCount
 } = require("../controller/notification");
 const { authentication, verify } = require('../middleware/authentication');
 const { authLimit } = require("../middleware/rateLimit");
@@ -45,29 +45,30 @@ const upload = multer({
     },
 });
 
-userRoutes.post("/login", asyncHandler(logIn));
-userRoutes.get("/logout", authentication, asyncHandler(logOut));
-userRoutes.get("/profile/:user_id", authentication, asyncHandler(getUser));
-userRoutes.post("/verify", verify);
-userRoutes.get("/posts", authentication, asyncHandler(getUserPosts));
-userRoutes.get("/search/", authentication, asyncHandler(searchUsers));
 
-userRoutes.get('/notification/:user_id', authentication, asyncHandler(getNotificaton));
+
+
+userRoutes.get("/logout", asyncHandler(logOut));
+userRoutes.get("/profile/:user_id", asyncHandler(getUser));
+userRoutes.get("/posts", asyncHandler(getUserPosts));
+userRoutes.get("/search/", asyncHandler(searchUsers));
+
+userRoutes.get('/notification/:user_id', asyncHandler(getNotificaton));
 userRoutes.get('/notification/unread/:user_id', asyncHandler(getUnreadCount));
 
-userRoutes.put("/edit/:user_id", upload.single("profile"), authentication, asyncHandler(editProfile));
-userRoutes.delete("/delete/:user_id", authLimit, authentication, asyncHandler(softDelete));
+userRoutes.put("/edit/:user_id", upload.single("profile"), asyncHandler(editProfile));
+userRoutes.delete("/delete/:user_id", authLimit, asyncHandler(softDelete));
 
-userRoutes.get("/sessions", authentication, asyncHandler(getSessions));
-userRoutes.delete("/session/:session_id", authentication, asyncHandler(deleteSession));
-userRoutes.delete("/sessions", authentication, asyncHandler(deleteAllSessions));
+userRoutes.get("/sessions", asyncHandler(getSessions));
+userRoutes.delete("/session/:session_id", asyncHandler(deleteSession));
+userRoutes.delete("/sessions", asyncHandler(deleteAllSessions));
 
-userRoutes.post("/follow", authentication, asyncHandler(follow));
-userRoutes.post("/follow/accept", authentication, asyncHandler(acceptRequest));
-userRoutes.post("/follow/delete", authentication, asyncHandler(deleteRequest));
-userRoutes.post("/unfollow", authentication, asyncHandler(unfollow));
-userRoutes.get("/follow/requests/:user_id", authentication, asyncHandler(getFollowrequests));
-userRoutes.get("/followers/:user_id", authentication, asyncHandler(getFollowers));
-userRoutes.get("/following/:user_id", authentication, asyncHandler(getFollowing));
+userRoutes.post("/follow", asyncHandler(follow));
+userRoutes.post("/follow/accept", asyncHandler(acceptRequest));
+userRoutes.post("/follow/delete", asyncHandler(deleteRequest));
+userRoutes.post("/unfollow", asyncHandler(unfollow));
+userRoutes.get("/follow/requests/:user_id", asyncHandler(getFollowrequests));
+userRoutes.get("/followers/:user_id", asyncHandler(getFollowers));
+userRoutes.get("/following/:user_id", asyncHandler(getFollowing));
 
 module.exports = userRoutes;

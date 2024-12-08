@@ -55,74 +55,80 @@ exports.getPosts = async (req, res) => {
 };
 
 exports.customizedFeed = async (req, res) => {
-    console.log("Inside getPosts");
+    console.log("\n\nInside getPosts");
     const { user_id, limit = 10, page = 1 } = req.query;
 
-    const rules = { user_id: "required|exist:users,user_id" , limit: "required|numeric", page: "required|numeric" };
+    const rules = { user_id: "required|exist:users,user_id", limit: "required|numeric", page: "required|numeric" };
     let { status, message } = await validate({ user_id, limit, page }, rules);
     if (!status) return response.failed(res, message);
-  
+
     if (req?.user?.user_id != user_id) return response.failed(res, "You dont have access.");
 
     const offset = (page - 1) * limit;
 
-    const { count, rows } = await Posts.findAndCountAll({
-        where: {
-            [Sequelize.Op.or]: [
-                {
-                    user_id: {
-                        [Sequelize.Op.in]: Sequelize.literal(`
+    try {
+        const { count, rows } = await Posts.findAndCountAll({
+            where: {
+                [Sequelize.Op.or]: [
+                    {
+                        user_id: {
+                            [Sequelize.Op.in]: Sequelize.literal(`
                             (SELECT followingId FROM follow WHERE followerId = ${user_id} AND status = 'accepted')
                         `)
+                        }
+                    },
+                    {
+                        '$user.public$': true
                     }
-                },
-                {
-                    '$user.public$': true
-                }
-            ]
-        },
-        include: [
-            {
-                model: Users,
-                as: "user",
-                attributes: ['username', 'user_id', 'name', 'profile_url', 'profile_img', 'public'],
-            }
-        ],
-        attributes: {
+                ]
+            },
             include: [
-                [literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.postId = Posts.id)`), "likeCount"],
-                [literal(`(SELECT COUNT(*) > 0 FROM Likes WHERE Likes.postId = Posts.id AND Likes.user_id = ${user_id})`), "liked"],
-                [literal(`(SELECT COUNT(*) FROM Comments WHERE Comments.post_id = Posts.id)`), "commentCount"]
-            ]
-        },
-        order: [['id', 'DESC']],
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-    });
+                {
+                    model: Users,
+                    as: "user",
+                    attributes: ['username', 'user_id', 'name', 'profile_url', 'profile_img', 'public'],
+                }
+            ],
+            attributes: {
+                include: [
+                    [literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.postId = Posts.id)`), "likeCount"],
+                    [literal(`(SELECT COUNT(*) > 0 FROM Likes WHERE Likes.postId = Posts.id AND Likes.user_id = ${user_id})`), "liked"],
+                    [literal(`(SELECT COUNT(*) FROM comments WHERE comments.post_id = Posts.id)`), "commentCount"]
+                ]
+            },
+            order: [['id', 'DESC']],
+            limit: parseInt(limit),
+            offset: parseInt(offset),
+        });
 
-    const totalPages = Math.ceil(count / limit);
+        const totalPages = Math.ceil(count / limit);
 
-    if (rows.length === 0) {
-        return response.success(res, "No posts found!", []);
+        if (rows.length === 0) {
+            return response.success(res, "No posts found!", []);
+        }
+
+        res.json({
+            posts: rows,
+            count,
+            totalPages,
+            currentPage: parseInt(page),
+        });
+    } catch (error) {
+        console.log("Error : " + error);
+        response.serverError(res)
     }
-
-    res.json({
-        posts: rows,
-        count,
-        totalPages,
-        currentPage: parseInt(page),
-    });
 };
 
 exports.getPost = async (req, res) => {
     const { post_id } = req.params;
     const { user_id } = req.user;
-    const rules = { post_id: "required|numeric|exist:posts,id", user_id: "required|exist:users,user_id" };
+    const rules = { post_id: "required|numeric|exist:Posts,id", user_id: "required|exist:users,user_id" };
     let { status, message } = await validate({ post_id, user_id }, rules);
     if (!status) return response.failed(res, message)
 
     if (req?.user?.user_id != user_id) return response.failed(res, "You dont have access.");
 
+try {
     let post = await Posts.findOne({
         where: { id: post_id },
         include: [
@@ -144,6 +150,13 @@ exports.getPost = async (req, res) => {
 
     const likeCount = await Like.count({ where: { postId: post_id } });
     res.json({ ...post.toJSON(), liked, likeCount });
+
+} catch (error) {
+console.log("\n\nError : " + error);
+return response.serverError(res);
+    
+}
+
 }
 
 exports.addPost = async (req, res) => {
@@ -152,7 +165,7 @@ exports.addPost = async (req, res) => {
     const rules = { user_id: "required|exist:users,user_id" };
     let { status, message } = await validate({ user_id }, rules);
     if (!status) return response.failed(res, message);
-  
+
 
     if (req?.user?.user_id != user_id) return response.failed(res, "You dont have access.");
 
@@ -185,10 +198,10 @@ exports.deletePost = async (req, res) => {
     const { id } = req.params;
     const { user_id } = req.user;
 
-    const rules = { id: "required|numeric|exist:posts,id", user_id: "required|exist:users,user_id" };
+    const rules = { id: "required|numeric|exist:Posts,id", user_id: "required|exist:users,user_id" };
     let { status, message } = await validate({ id, user_id }, rules);
     if (!status) return response.failed(res, message);
-    
+
     if (req?.user?.user_id != user_id) return response.failed(res, "You dont have access.");
 
     const post = await Posts.findOne({ where: { id, user_id }, attributes: ['image_path'] });
@@ -208,7 +221,7 @@ exports.addComment = async (req, res) => {
     const { user_id } = req.user;
 
     const rules = {
-        post_id: "required|numeric|exist:posts,id",
+        post_id: "required|numeric|exist:Posts,id",
         comment: "required|string",
         user_id: "required|exist:users,user_id"
     };

@@ -12,6 +12,8 @@ const AdminLog = require("./adminLogModel");
 const Issues = require("./issuesModel");
 const Issueschat = require("./issuesChatModel");
 
+const sequelize = require("../database/database");
+
 Users.hasMany(Posts, { foreignKey: "user_id" }); //  user can have many posts
 Posts.belongsTo(Users, { foreignKey: "user_id" }); //  post belongs to one user
 
@@ -59,14 +61,23 @@ Issueschat.belongsTo(Users, { foreignKey: 'receiver_id', as: 'receiver' });
 Session.belongsTo(Users, { foreignKey: "user_id", as: "user" });
 
 
-// sequelize.sync({alter : true})
+// sequelize.sync({alter : true, force : true})
 //     .then(() => console.log("Models sync success"))
 //     .catch((err) => console.log("Error sync Models " + err))
 
 // Posts.sync({ alter: true })
 //   .then(() => console.log("Models sync success"))
 //   .catch((err) => console.log("Error sync Models " + err));
+// Comments.sync({ alter: true })
+//   .then(() => console.log("Models sync success"))
+//   .catch((err) => console.log("Error sync Models " + err));
+// Session.sync({ alter: true })
+//   .then(() => console.log("Models sync success"))
+//   .catch((err) => console.log("Error sync Models " + err));
 
+// Session.sync({ alter: true })
+//   .then(() => console.log("Models sync success"))
+//   .catch((err) => console.log("Error sync Models " + err));
 
 module.exports = {
   Users,

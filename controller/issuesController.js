@@ -87,10 +87,11 @@ exports.resolveIssue = async (req, res) => {
 
 // add a new issue
 exports.addIssue = async (req, res) => {
+    console.log("\n\ninside add issue")
     const { user_id, type = "others", description = "" } = req.body;
 
     // validation
-    const rules = { user_id: "required|integer|exist:users,id", type: "required|string", description: "required|string" };
+    const rules = { user_id: "required|integer|exist:users,user_id", type: "required|string", description: "required|string" };
     let { status, message } = await validate({ user_id, type, description }, rules);
     if (!status) return response.failed(res, "Provide correct information.", message);
 
@@ -98,28 +99,36 @@ exports.addIssue = async (req, res) => {
         return response.failed(res, "Invalid file !", req.fileValidationError)
     }
 
-    // Determine screenshot URL if file is provided
-    let screenshotUrl = null;
+    try {
+        // Determine screenshot URL if file is provided
+        let screenshotUrl = null;
 
-    // Handle Cloudinary upload if file is present
-    if (req.file) {
-        screenshotUrl = await new Promise((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-                {
-                    folder: "instabook_support_tickets",
-                    public_id: `support_user_${user_id}_${Date.now()}`
-                }, // Optional folder for organization
-                (error, result) => {
-                    if (error) return reject(error);
-                    resolve(result.secure_url); // Cloudinary's URL
-                }
-            );
-            uploadStream.end(req.file.buffer); // Pipe file buffer to Cloudinary
-        });
+        // Handle Cloudinary upload if file is present
+        if (req.file) {
+            screenshotUrl = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    {
+                        folder: "instabook_support_tickets",
+                        public_id: `support_user_${user_id}_${Date.now()}`
+                    }, // Optional folder for organization
+                    (error, result) => {
+                        if (error) return reject(error);
+                        resolve(result.secure_url); // Cloudinary's URL
+                    }
+                );
+                uploadStream.end(req.file.buffer); // Pipe file buffer to Cloudinary
+            });
+        }
+
+        const newIssue = await Issues.create({ user_id, type, description, screenshotUrl });
+        if (newIssue) return response.success(res, "Issue added successfully.");
+
+    } catch (error) {
+        console.log("\n\nError : " + error);
+        return response.serverError(res);
     }
 
-    const newIssue = await Issues.create({ user_id, type, description, screenshotUrl });
-    if (newIssue) return response.success(res, "Issue added successfully.");
+
 }
 
 

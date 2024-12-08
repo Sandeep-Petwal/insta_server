@@ -10,7 +10,6 @@ const Comments = sequelize.define(
       primaryKey: true,
     },
     user_id: {
-      // foreign Key for the user who made  comment
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
@@ -21,11 +20,10 @@ const Comments = sequelize.define(
       onUpdate: "CASCADE",
     },
     post_id: {
-      // Foreign Key for the post where the comment is made
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "posts",
+        model: "Posts",
         key: "id",
       },
       onDelete: "CASCADE",

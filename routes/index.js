@@ -5,15 +5,18 @@ const verificationRoutes = require("./verificationRoutes");
 const messageRoutes = require("./messageRoutes")
 const adminRoutes = require("../ADMIN/routes/index.js")
 const supportRoutes = require("./supportRoutes");
+const authRoutes = require("./authRoutes.js")
 const express = require("express");
 const { authentication } = require("../middleware/authentication.js");
 
 const routes = express.Router();
 
-routes.use("/user", limiter, userRoutes);
-routes.use("/post", limiter, postRoutes);
+routes.use("/user", authLimit, authRoutes)
 routes.use("/verify", authLimit, verificationRoutes);
-routes.use("/messages", limiter, messageRoutes);
+
+routes.use("/user", limiter,authentication,  userRoutes);
+routes.use("/post", limiter, authentication, postRoutes);
+routes.use("/messages", limiter, authentication, messageRoutes);
 routes.use("/admin", limiter, adminRoutes);// admin routes
 routes.use("/support", limiter, authentication, supportRoutes); // support routes
 

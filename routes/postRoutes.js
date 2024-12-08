@@ -19,14 +19,14 @@ const upload = multer({
     },
 });
 
-postRoutes.post("/add", upload.single("post"), authentication, asyncHandler(addPost));
-postRoutes.delete("/delete/:id", authentication, asyncHandler(deletePost));
-postRoutes.get("/feed", authentication, asyncHandler(customizedFeed));
-postRoutes.get("/fullpost/:post_id", authentication, asyncHandler(getPost));
-postRoutes.get("/comments/:post_id", authentication, asyncHandler(getComments));
-postRoutes.post("/comments/:post_id", authentication, asyncHandler(addComment));
-postRoutes.put("/comment/:comment_id", authentication, asyncHandler(editComment));
-postRoutes.post("/like/:post_id", authentication, asyncHandler(setLikes));
-postRoutes.delete("/comment/:comment_id", authentication, asyncHandler(deleteComment));
+postRoutes.post("/add", upload.single("post"), asyncHandler(addPost));
+postRoutes.delete("/delete/:id", asyncHandler(deletePost));
+postRoutes.get("/feed", asyncHandler(customizedFeed));
+postRoutes.get("/fullpost/:post_id", asyncHandler(getPost));
+postRoutes.get("/comments/:post_id", asyncHandler(getComments));
+postRoutes.post("/comments/:post_id", asyncHandler(addComment));
+postRoutes.put("/comment/:comment_id", asyncHandler(editComment));
+postRoutes.post("/like/:post_id", asyncHandler(setLikes));
+postRoutes.delete("/comment/:comment_id", asyncHandler(deleteComment));
 
 module.exports = postRoutes;

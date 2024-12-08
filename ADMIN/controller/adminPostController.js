@@ -55,7 +55,7 @@ exports.getAllPosts = async (req, res) => {
         attributes: {
             include: [
                 [literal(`(SELECT COUNT(*) FROM Likes WHERE Likes.postId = Posts.id)`), 'Likes'],
-                [literal('(SELECT COUNT(*) FROM Comments WHERE Comments.post_id = Posts.id)'), 'Comments'],
+                [literal('(SELECT COUNT(*) FROM comments WHERE comments.post_id = Posts.id)'), 'Comments'],
             ]
         },
     });
@@ -81,7 +81,7 @@ exports.deletePost = async (req, res) => {
     const { id } = req.params;
 
 
-    const rules = { id: "required|numeric|exist:posts,id" };
+    const rules = { id: "required|numeric|exist:Posts,id" };
     let { status, message } = await validate({ id }, rules);
     if (!status) return response.failed(res, message);
 
@@ -96,12 +96,12 @@ exports.deletePost = async (req, res) => {
     }
 
     // also remove post image
-    if (post.image_path) {
-        const imagePath = path.join(__dirname, '../../', post.image_path);
-        fs.unlink(imagePath, (err) => {
-            if (err) console.error("error deleting post image:", err);
-            else console.log("Post image deleted successfully");
-        });
-    }
+    // if (post.image_path) {
+    //     const imagePath = path.join(__dirname, '../../', post.image_path);
+    //     fs.unlink(imagePath, (err) => {
+    //         if (err) console.error("error deleting post image:", err);
+    //         else console.log("Post image deleted successfully");
+    //     });
+    // }
     return response.success(res, `Successfully deleted the post : ${id}.`);
 };

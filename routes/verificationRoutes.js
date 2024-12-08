@@ -1,6 +1,7 @@
 const express = require("express");
 const verificationRoutes = express.Router();
-const { enable2Fa, disable2Fa, verify2Fa, verifyLogin, createTempUser, verifyUserRegistration, sendForgetPassMail, verifyForgetPassword, changePassword } = require("../controller/TwoFectorAuth.js");
+const { enable2Fa, disable2Fa, verify2Fa, verifyLogin } = require("../controller/TwoFectorAuth.js");
+const { createTempUser, verifyUserRegistration, sendForgetPassMail, verifyForgetPassword, changePassword } = require("../controller/emailController.js")
 const { authentication } = require('../middleware/authentication.js');
 const asyncHandler = require("../middleware/asyncHandler.js");
 

@@ -158,39 +158,47 @@ exports.getUser = async (req, res) => {
   let { status, message } = await validate({ user_id }, rules);
   if (!status) return response.failed(res, message);
 
-  const user = await Users.findOne({
-    where: { user_id },
-    attributes: {
-      exclude: ["password", "otp", "two_factor_secret"],
-      include: [
-        [
-          literal(
-            `(SELECT COUNT(*) FROM Posts WHERE Posts.user_id = Users.user_id)`
-          ),
-          "posts",
+  try {
+    const user = await Users.findOne({
+      where: { user_id },
+      attributes: {
+        exclude: ["password", "otp", "two_factor_secret"],
+        include: [
+          [
+            literal(
+              `(SELECT COUNT(*) FROM Posts WHERE Posts.user_id = users.user_id)`
+            ),
+            "posts",
+          ],
+          [
+            literal(
+              '(SELECT COUNT(*) FROM follow WHERE follow.followingId = users.user_id AND follow.status = "accepted")'
+            ),
+            "followers",
+          ],
+          [
+            literal(
+              '(SELECT COUNT(*) FROM follow WHERE follow.followerId = users.user_id AND follow.status = "accepted")'
+            ),
+            "following",
+          ],
+          [
+            literal(
+              `COALESCE((SELECT status FROM follow WHERE follow.followerId = ${loggedInUser} AND follow.followingId = ${user_id}), 'none')`
+            ),
+            "status",
+          ],
         ],
-        [
-          literal(
-            '(SELECT COUNT(*) FROM Follow WHERE Follow.followingId = Users.user_id AND Follow.status = "accepted")'
-          ),
-          "followers",
-        ],
-        [
-          literal(
-            '(SELECT COUNT(*) FROM Follow WHERE Follow.followerId = Users.user_id AND Follow.status = "accepted")'
-          ),
-          "following",
-        ],
-        [
-          literal(
-            `COALESCE((SELECT status FROM Follow WHERE Follow.followerId = ${loggedInUser} AND Follow.followingId = ${user_id}), 'none')`
-          ),
-          "status",
-        ],
-      ],
-    },
-  });
-  return response.success(res, "User found", user);
+      },
+    });
+    return response.success(res, "User found", user);
+  } catch (error) {
+    console.log("\n\nError : " + error);
+    return response.serverError(res);
+  }
+
+
+
 };
 
 

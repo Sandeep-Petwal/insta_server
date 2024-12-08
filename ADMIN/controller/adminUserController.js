@@ -122,28 +122,33 @@ exports.getAllUsers = async (req, res) => {
         };
     }
 
-    const { count, rows } = await Users.findAndCountAll({
-        where: whereCondition,
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-        order: [[sortColumn, sortDirection.toLowerCase()]],
-        attributes: {
-            exclude: ['password'],
-            include: [
-                [literal('(SELECT COUNT(*) FROM Posts WHERE Posts.user_id = Users.user_id)'), 'Posts']
-            ]
-        },
+    try {
+        const { count, rows } = await Users.findAndCountAll({
+            where: whereCondition,
+            limit: parseInt(limit),
+            offset: parseInt(offset),
+            order: [[sortColumn, sortDirection.toLowerCase()]],
+            attributes: {
+                exclude: ['password'],
+                include: [
+                    [literal('(SELECT COUNT(*) FROM Posts WHERE Posts.user_id = users.user_id)'), 'Posts']
+                ]
+            },
 
-    });
+        });
 
-    const totalPages = Math.ceil(count / limit);
+        const totalPages = Math.ceil(count / limit);
 
-    res.json({
-        users: rows,
-        count,
-        totalPages,
-        currentPage: parseInt(page),
-    });
+        res.json({
+            users: rows,
+            count,
+            totalPages,
+            currentPage: parseInt(page),
+        });
+    } catch (error) {
+        console.log("\n\nError : " + error)
+        return response.serverError(res);
+    }
 
 
 };
@@ -199,9 +204,22 @@ exports.getDashboardAnalytics = async (req, res) => {
         });
 
         // login activity distribution
+        // const loginActivityDistribution = await Users.findAll({
+        //     attributes: [
+        //         'login_count', 'name', 'user_id'
+        //     ],
+        //     group: ['login_count'],
+        //     order: [['login_count', 'DESC']],
+        //     limit: 10
+        // });
+
+
+        // login activity distribution
         const loginActivityDistribution = await Users.findAll({
             attributes: [
-                'login_count', 'name', 'user_id'
+                'login_count',
+                [fn('MAX', col('name')), 'name'],
+                [fn('MAX', col('user_id')), 'user_id']
             ],
             group: ['login_count'],
             order: [['login_count', 'DESC']],
@@ -213,7 +231,7 @@ exports.getDashboardAnalytics = async (req, res) => {
             attributes: [
                 'user_id',
                 'username',
-                [literal('(SELECT COUNT(*) FROM Posts WHERE Posts.user_id = Users.user_id)'), 'post_count']
+                [literal('(SELECT COUNT(*) FROM Posts WHERE Posts.user_id = users.user_id)'), 'post_count']
             ],
             order: [[literal('post_count'), 'DESC']],
             limit: 5
@@ -223,7 +241,7 @@ exports.getDashboardAnalytics = async (req, res) => {
         const followDistribution = await Users.findAll({
             attributes: [
                 'user_id', 'username',
-                [literal(`(SELECT COUNT(*) FROM Follow WHERE Follow.followerId = Users.user_id)`), "followers_count"]
+                [literal(`(SELECT COUNT(*) FROM follow WHERE follow.followerId = users.user_id)`), "followers_count"]
             ],
             order: [[literal('followers_count'), 'DESC']],
             limit: 5
@@ -246,7 +264,7 @@ exports.getDashboardAnalytics = async (req, res) => {
             },
             topUsers: {
                 byPosts: postsDistribution,
-                byFollowers: followDistribution,
+                byfollowers: followDistribution,
                 byLoginActivity: loginActivityDistribution,
             }
         });
@@ -270,9 +288,9 @@ exports.getUserDetails = async (req, res) => {
         attributes: {
             exclude: ['password', 'otp'],
             include: [
-                [literal(`(SELECT COUNT(*) FROM Posts WHERE Posts.user_id = Users.user_id)`), 'posts'],
-                [literal('(SELECT COUNT(*) FROM Follow WHERE Follow.followingId = Users.user_id AND Follow.status = "accepted")'), 'followers'],
-                [literal('(SELECT COUNT(*) FROM Follow WHERE Follow.followerId = Users.user_id AND Follow.status = "accepted")'), 'following'],
+                [literal(`(SELECT COUNT(*) FROM Posts WHERE Posts.user_id = users.user_id)`), 'posts'],
+                [literal('(SELECT COUNT(*) FROM follow WHERE follow.followingId = users.user_id AND follow.status = "accepted")'), 'followers'],
+                [literal('(SELECT COUNT(*) FROM follow WHERE follow.followerId = users.user_id AND follow.status = "accepted")'), 'following'],
             ]
         },
     });

@@ -75,7 +75,7 @@ exports.deleteMessage = async (req, res) => {
 
     const deletedCount = await Messages.destroy({ where: { id } });
     if (deletedCount === 0) return response.failed(res, "No Message found with id")
-    return response.success(res, "Message Deleted")
+    return response.success(res, "Message Deleted");
 }
 
 exports.editMessage = async (req, res) => {
