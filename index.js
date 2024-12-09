@@ -18,12 +18,12 @@ app.use(helmet());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-const errorHandler = require('./middleware/errorHandler');
+const errorHandler = require('./middleware/errorHandler.js');
 app.use(errorHandler);
 
 
 // Logging   ------------------------------------
-const { logMiddleware, errorLog } = require('./middleware/logging');
+const { logMiddleware, errorLog } = require('./middleware/logging.js');
 app.use(logMiddleware);
 app.use(errorLog);
 
@@ -31,15 +31,15 @@ app.use(errorLog);
 
 
 // Routes --------------------------------------
-const routes = require('./routes');
+const routes = require('./routes.js');
 app.use("/api", routes);
 
 // Socket.IO  ------------------------------------
-const { socketConfig } = require("./config/socket.config")
+const { socketConfig } = require("./config/socket.config.js")
 const io = new Server(httpServer, socketConfig);
-require('./socket/socketHandler')(io);
+require('./socket/socketHandler.js')(io);
 
-const socketUtil = require('./util/socket');
+const socketUtil = require('./util/socket.js');
 socketUtil.init(io);
 
 

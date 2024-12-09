@@ -1,12 +1,12 @@
 var jwt = require("jsonwebtoken");
-const response = require("../util/response");
+const response = require("../util/response.js");
 const secret = process.env.SECRET_KEY;
 const bcrypt = require("bcrypt");
 const validate = require("../util/validator");
 const { literal, Op } = require("sequelize");
 const { v4: uuidv4 } = require("uuid");
 const path = require("path");
-const cloudinary = require('../config/cloudinaryConfig');
+const cloudinary = require('../config/cloudinaryConfig.js');
 const sequelize = require("../database/database.js");
 
 // const fs = require('fs')

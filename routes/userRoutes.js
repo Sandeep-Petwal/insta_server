@@ -1,6 +1,6 @@
 const express = require("express");
 const userRoutes = express.Router();
-const cloudinary = require('../config/cloudinaryConfig');
+const cloudinary = require('../config/cloudinaryConfig.js');
 const multer = require("multer");
 const {
     logIn,
@@ -13,7 +13,7 @@ const {
     getSessions,
     deleteSession,
     deleteAllSessions
-} = require("../controller/userController");
+} = require("../controller/userController.js");
 const {
     follow,
     acceptRequest,
@@ -22,14 +22,14 @@ const {
     getFollowrequests,
     getFollowers,
     getFollowing
-} = require("../controller/followController");
+} = require("../controller/followController.js");
 const {
     getNotificaton,
     getUnreadCount
-} = require("../controller/notification");
-const { authentication, verify } = require('../middleware/authentication');
-const { authLimit } = require("../middleware/rateLimit");
-const asyncHandler = require("../middleware/asyncHandler");
+} = require("../controller/notification.js");
+const { authentication, verify } = require('../middleware/authentication.js');
+const { authLimit } = require("../middleware/rateLimit.js");
+const asyncHandler = require("../middleware/asyncHandler.js");
 
 const storage = multer.memoryStorage();
 const upload = multer({

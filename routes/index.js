@@ -1,10 +1,10 @@
 const { limiter, authLimit } = require("../middleware/rateLimit.js")
-const userRoutes = require("./userRoutes");
-const postRoutes = require("./postRoutes");
-const verificationRoutes = require("./verificationRoutes");
-const messageRoutes = require("./messageRoutes")
+const userRoutes = require("./userRoutes.js");
+const postRoutes = require("./postRoutes.js");
+const verificationRoutes = require("./verificationRoutes.js");
+const messageRoutes = require("./messageRoutes.js")
 const adminRoutes = require("../ADMIN/routes/index.js")
-const supportRoutes = require("./supportRoutes");
+const supportRoutes = require("./supportRoutes.js");
 const authRoutes = require("./authRoutes.js")
 const express = require("express");
 const { authentication } = require("../middleware/authentication.js");
