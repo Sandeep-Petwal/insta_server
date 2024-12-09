@@ -31,7 +31,7 @@ app.use(errorLog);
 
 
 // Routes --------------------------------------
-const routes = require('./routes.js');
+const routes = require('./routes/index.js');
 app.use("/api", routes);
 
 // Socket.IO  ------------------------------------
